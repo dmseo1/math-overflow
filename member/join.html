@@ -1,0 +1,512 @@
+<html>
+<head>
+	<title>회원 가입</title>
+
+<script src="../js/AesUtil.js"></script> 
+<script src="../js/aes.js"></script> 
+<script src="../js/pbkdf2.js"></script> 
+
+
+ <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}
+      });
+    </script>
+    <script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+	<script src="click_cal.js"></script>
+
+	<script src="http://code.jquery.com/jquery.min.js"></script>
+
+	
+	<!-- 이미지 등록과 관련된 함수를 정의하였음 -->
+	<script type="text/javascript">
+
+		function onImageRegistered()
+		{
+			document.joinForm.getimg.style.display = "none";
+			document.joinForm.memberimage.style.display = "none";
+			document.joinForm.reimg.style.display = "block";
+			document.joinForm.memberimage_ok.value = "1";
+		}
+
+		function onImageRe()
+		{
+			 $('#blah').attr('src', "/member/memberimage/ico_noimg.png");
+			 document.joinForm.getimg.style.display = "block";
+			 document.joinForm.memberimage.style.display = "block";
+			 document.joinForm.reimg.style.display="none";
+			 document.joinForm.memberimage_ok.value = "0";
+		}
+
+        $(function() {
+            $("#imgInp").on('change', function(){ //사진이 바뀌게 된다면
+                readURL(this); //URL을 읽으세요
+				var fileValue = $("#imgInp").val().split("\\");
+				var fileName = fileValue[fileValue.length-1]; // 파일명
+				//document.joinForm.memberimage_name.value = fileName;
+				onImageRegistered();
+			
+            });
+        });
+
+        function readURL(input) { //URL을 읽는 과정
+            if (input.files && input.files[0]) { //파일 인풋으로부터 읽어들인 자료가 존재한다면
+            var reader = new FileReader(); //파일리더를 하나 정의하고
+
+            reader.onload = function (e) {  
+                    $('#blah').attr('src', e.target.result);
+                }
+              reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+
+    </script>
+	<!-- 이미지 등록과 관련된 함수를 정의하였음 -->
+
+
+
+	<!-- 이메일 검사와 관련된 함수를 정의하였음 -->
+	<script language="javascript">
+
+
+		function popup(frm)
+		{
+			var email = document.joinForm.member_join_email.value;
+			var regex = /^([\w-]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$/i;
+			if(email == "")
+			{
+				alert("이메일을 입력해주세요.");
+				document.getElementById("member_join_email").focus();
+			}
+			else if(!regex.test(email))
+			{
+				alert("올바른 이메일 형식이 아닙니다.");
+				document.joinForm.member_join_email.value = "";
+				document.getElementById("member_join_email").focus();
+			}
+			else
+			{
+			  var url    ="/member/join_id_dupchk.php";
+			  var title  = "이메일 중복 확인";
+			  var status = "toolbar=no,directories=no,scrollbars=no,resizable=no,status=no,menubar=no,width=300, height=200, top=0,left=20"; 
+			  window.open("", title,status); //window.open(url,title,status); window.open 함수에 url을 앞에와 같이
+														//인수로  넣어도 동작에는 지장이 없으나 form.action에서 적용하므로 생략
+														//가능합니다.
+			  frm.target = title;                    //form.target 이 부분이 빠지면 form값 전송이 되지 않습니다. 
+			  frm.action = url;                    //form.action 이 부분이 빠지면 action값을 찾지 못해서 제대로 된 팝업이 뜨질 않습니다.
+			  frm.method = "post";
+			  frm.submit();   
+			}
+		 }
+
+
+		function emailReset()
+		{
+			document.getElementById("member_join_email_reset").style.visibility = "hidden";
+			document.getElementById("member_join_email").focus();
+			document.joinForm.member_join_email.readOnly = false;
+			document.joinForm.member_join_email.value = "";
+			document.joinForm.dupchk_ok.value = "";	
+		}
+
+
+
+
+		function pwValidateChk()
+		{
+			if(document.joinForm.member_join_pw_re.value == "")
+			{
+				document.joinForm.valid_text_re.value = "";
+			}
+			else if(document.joinForm.member_join_pw.value != document.joinForm.member_join_pw_re.value)
+			{
+				document.joinForm.valid_text_re.value = "두 비밀번호가 일치하지 않습니다";
+			}
+			else
+			{
+				document.joinForm.valid_text_re.value = "두 비밀번호가 일치합니다";
+			}
+
+			if(document.joinForm.member_join_pw.value.length == 0)
+			{
+				document.joinForm.valid_text.value = "비밀번호를 입력하세요";
+			}
+			else if(document.joinForm.member_join_pw.value.length < 6)
+			{
+				document.joinForm.valid_text.value = "비밀번호가 너무 짧습니다";
+			}
+			else
+			{
+				document.joinForm.valid_text.value = "";
+			}
+		}
+
+
+		function pwValidateChk_Re()
+		{
+			if(document.joinForm.member_join_pw.value != document.joinForm.member_join_pw_re.value)
+			{
+				document.joinForm.valid_text_re.value = "두 비밀번호가 일치하지 않습니다";
+			}
+			else if(document.joinForm.member_join_pw_re.value == "")
+			{
+				document.joinForm.valid_text_re.value = "";
+			}
+			else
+			{
+				document.joinForm.valid_text_re.value = "두 비밀번호가 일치합니다";
+			}
+		}
+
+		function email_regex_test()
+		{
+
+			var email = document.joinForm.member_join_email.value;
+			var regex = /^([\w-]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$/i;
+			if(email == "")
+			{
+				return false;
+			}
+			else if(!regex.test(email))
+			{
+				return false;
+			}
+
+			return true;
+		}
+
+
+		//가입 전 최종점검
+		function ChkBeforeRegister()
+		{
+			if(!document.getElementById("y_yes").checked)
+			{
+				alert("약관에 동의하여야 회원 가입이 가능합니다.");
+				document.getElementById("y_yes").focus();
+				return;
+			}
+			else if(document.joinForm.member_join_email.value == "")
+			{
+				alert("이메일을 입력해주세요.");
+				document.joinForm.member_join_email.focus();
+				return;
+			}
+			else if(!email_regex_test())
+			{
+				alert("올바른 이메일 형식이 아닙니다.");
+				document.joinForm.member_join_email.value = "";
+				document.joinForm.member_join_email.focus();
+			}
+			else if(document.joinForm.dupchk_ok.value != "1")
+			{
+				alert("이메일 중복 검사를 해주세요.");
+				document.joinForm.member_join_email_dupchk.focus();
+				return;
+			}
+			else if(document.joinForm.member_join_pw.value.length < 6)
+			{
+				alert("비밀번호는 6자 이상으로 입력해주세요.");
+				document.joinForm.member_join_pw.value = "";
+				document.joinForm.member_join_pw.focus();
+				return;
+			}
+			else if(document.joinForm.member_join_pw.value != document.joinForm.member_join_pw_re.value)
+			{
+				alert("비밀번호와 비밀번호 확인 값이 일치하지 않습니다.");
+				document.joinForm.member_join_pw.value = "";
+				document.joinForm.member_join_pw_re.value = "";
+				document.joinForm.member_join_pw.focus();
+				return;
+			}
+			else if(document.joinForm.member_join_nickname.value == "")
+			{
+				alert("닉네임을 입력해주세요.");
+				document.joinForm.member_join_nickname.focus();
+			}
+			else if(document.joinForm.member_join_nickname.value.length > 20)
+			{
+				alert("닉네임은 20자 이하로 입력해주세요.");
+				document.joinForm.member_join_nickname.focus();
+			}
+			else if(document.joinForm.member_join_birthday.value == "")
+			{
+				alert("생년월일을 선택해주세요.");
+				document.joinForm.member_join_birthday.focus();
+				return;
+			}
+			else if(document.getElementById("qual_ok").value != "1")
+			{
+				alert("이메일 인증을 완료하지 않았습니다.");
+				document.joinForm.member_join_btn_mail_verify.focus();
+				return;
+			}
+			else
+			{
+				//window.open('about:blank','_self').close();
+
+				//최종 암호화
+				var keySize = 128;
+				var iterations = iterationCount = 10000;
+				 
+				var iv = "F27D5C9927726BCEFE7510B1BDD3D137";
+				var salt = "3FF2EC019C627B945225DEBAD71A01B6985FE84C95A70EB132882F88C0A59A55";
+				var passPhrase = "passPhrase passPhrase aes encoding algorithm";
+				 
+				var plainText = document.joinForm.member_join_pw.value;
+
+
+				var aesUtil = new AesUtil(keySize, iterationCount)
+				var encrypt = aesUtil.encrypt(salt, iv, passPhrase, plainText);
+				 
+				aesUtil = new AesUtil(keySize, iterationCount)
+				document.joinForm.member_join_pw.value = encrypt;
+				document.joinForm.member_join_pw_re.value = encrypt;
+			
+ 				document.joinForm.target = "_self";
+				document.joinForm.action = "/member/join_ok.php";
+				document.joinForm.submit();
+			}
+				
+		}
+
+
+		function DupChk()
+		{
+			var email = document.joinForm.member_join_email.value;
+			var regex = /^([\w-]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$/i;
+			if(email == "")
+			{
+				alert("이메일을 입력해주세요.");
+				document.getElementById("member_join_email").focus();
+			}
+			else if(!regex.test(email))
+			{
+				alert("올바른 이메일 형식이 아닙니다.");
+				document.joinForm.member_join_email.value = "";
+				document.getElementById("member_join_email").focus();
+			}
+			else
+			{
+				window.open("/member/join_id_dupchk.php?email=" + email, "중복 확인", "width=300, height=200, left=250, top=250, scrollbar=yes, resizable=no");
+			}
+			
+			
+		}
+
+
+
+
+		function MailQual(frm)
+		{
+			if(document.joinForm.dupchk_ok.value != "1")
+			{
+				alert("이메일 중복 검사를 완료하지 않았습니다.");
+				return;
+			}
+			else
+			{
+			  var url    ="../mail/contact_me.php";
+			  var title  = "이메일 인증";
+			  var status = "toolbar=no,directories=no,scrollbars=no,resizable=no,status=no,menubar=no,width=300, height=200, top=0,left=20"; 
+			  window.open("", title,status); //window.open(url,title,status); window.open 함수에 url을 앞에와 같이
+														//인수로  넣어도 동작에는 지장이 없으나 form.action에서 적용하므로 생략
+														//가능합니다.
+			  frm.target = title;                    //form.target 이 부분이 빠지면 form값 전송이 되지 않습니다. 
+			  frm.action = url;                    //form.action 이 부분이 빠지면 action값을 찾지 못해서 제대로 된 팝업이 뜨질 않습니다.
+			  frm.method = "post";
+			  frm.submit();   
+			}
+		 }
+
+
+		function MailQual_ok(frm)
+		{
+			
+			  var url    ="join_mailqual_ok.php";
+			  var title  = "이메일 인증";
+			  var status = "toolbar=no,directories=no,scrollbars=no,resizable=no,status=no,menubar=no,width=300, height=200, top=0,left=20"; 
+			  window.open("", title,status); //window.open(url,title,status); window.open 함수에 url을 앞에와 같이
+														//인수로  넣어도 동작에는 지장이 없으나 form.action에서 적용하므로 생략
+														//가능합니다.
+			  frm.target = title;                    //form.target 이 부분이 빠지면 form값 전송이 되지 않습니다. 
+			  frm.action = url;                    //form.action 이 부분이 빠지면 action값을 찾지 못해서 제대로 된 팝업이 뜨질 않습니다.
+			  frm.method = "post";
+			  frm.submit();   
+
+		 }
+
+
+	</script>
+	<!-- 이메일 검사와 관련된 함수를 정의하였음 -->
+
+
+<meta charset="utf-8">
+	<link rel="stylesheet" type="text/css" href="/framestyle.css" />
+</head>
+
+<body>
+
+<div id="wrap">
+  <div id="header">
+    <?php
+	include("../frame_top.html");
+    ?>
+  </div>
+
+  <div id="sidebar">
+    <?php
+	include("../frame_left.html");
+    ?>
+  </div>
+
+  <div id="content">
+
+	<?php
+		@session_start();
+		// 
+		if(isset($_SESSION['user_email']) && isset($_SESSION['user_password']))
+		{
+			echo "<div style=\"width:50%;margin-left:100;margin-top:80;margin-bottom:500\">";
+			echo "<table width=100%><tr><td colspan=2 style=\"padding-bottom:50px\"><center>로그아웃 후에 회원가입을 시도해주세요.<br><br></center></td></tr>";
+			echo "<tr><td width=50%><button style=\"width:100%\" type=\"button\" class=\"snip1535_list\" onclick=\"location.href='/member/logout.php'\">로그아웃</button></td>
+				<td width=50%><button style=\"width:100%\" type=\"button\" class=\"snip1535_list\" onclick=\"history.back();\">뒤로
+				</button></td>
+
+			</tr></table></div>";
+		}
+	?>
+
+	<h2>회원가입</h2>
+
+	<form name="joinForm" action="/member/join_ok.php" method="post" enctype='multipart/form-data'>
+
+
+		<fieldset style="width:80%; border:2pt solid #ff901e;margin-bottom:20">
+			<legend align="center"><font color="#ff901e">회원 약관</font></legend>
+			<textarea style="width:100%;height:100;margin:auto;margin-top:10;margin-bottom:10;border:1pt solid #ff901e" readonly>지켜주세용</textarea><br>
+
+			※ 위 약관을 읽었으며, 이에 동의합니다. <input type="radio" name="yakgwan" id="y_yes"> 예 <input type="radio" name="yakgwan" id="y_no"> 아니오 
+
+
+
+
+
+		</fieldset>
+		<fieldset style="width:80%; border:2pt solid #ff901e">
+			<legend align="center"><font color="#ff901e">필수 정보 입력</font></legend>
+
+		<table width=100%>
+			<tr align="left" border=0>
+			
+			<form name="emailDupChk" action="/member/join_id_dupchk.php" method="post">
+				<td align="center">이메일</td> 
+				<td><input type="text" id="member_join_email" name="member_join_email" style="width:35%;height:30;border:1px solid #ff901e;font-size:17;padding-left:5"/> <button type="button" onclick="javascript:popup(this.form);" name="member_join_email_dupchk" class="snip1535_list">이메일 중복 체크</button>&nbsp; <button type="button" id="member_join_email_reset" name="member_join_email_reset" onclick="javascript:emailReset();" style="visibility:hidden" class="snip1535_list">다른 이메일 사용</button>
+				<input type="hidden" name="dupchk_ok" id="dupchk_ok" readonly/>
+			</form>
+			
+			</tr>
+
+			<tr align="left" border=0>
+				
+				<td align="center" style="padding-top:10">비밀번호</td>
+				<td style="padding-top:10"><input type="password" name="member_join_pw" onkeyup="javascript:pwValidateChk();" style="width:25%;height:30;border:1px solid #ff901e;font-size:17;padding-left:5" /> <input type="text" name="valid_text" id="valid_text" style="border:0;background:white" disabled/></td>
+				
+			</tr>
+			<tr border=0>
+				<td align="center">비밀번호 확인</td>
+				<td><input type="password" name="member_join_pw_re" onkeyup="javascript:pwValidateChk_Re();" style="width:25%;height:30;border:1px solid #ff901e;font-size:17;padding-left:5" /> <input type="text" name="valid_text_re" id="valid_text_re" style="border:0;width:300;background:white" disabled/></td>
+			</tr>
+
+			<td align="center" style="padding-top:10">성명(본명)</td>
+			<td style="padding-top:10;font-size:10pt"><input type="text" id="member_join_realname" name="member_join_realname" style="width:25%;height:30;border:1px solid #ff901e;font-size:17;padding-left:5"/> - 이메일 및 비밀번호 분실 시 본인확인용도로 사용되는 이름입니다. <b>등록 후 수정불가</b></td></tr>
+		
+			<td align="center" style="padding-top:10">닉네임</td> 
+			<td style="padding-top:10;font-size:10pt"><input type="text" id="member_join_nickname" name="member_join_nickname" style="width:25%;height:30;border:1px solid #ff901e;font-size:17;padding-left:5"/> - 질문/답변, 커뮤니티 활동시 사용되는 이름입니다.</td></tr>
+
+
+			<tr border=0>
+				<td align="center" style="padding-top:10">생년월일</td>
+				<td style="padding-top:10">
+				<input type="text" name="member_join_birthday" onfocus="Calendar(this, 'down','no');" style="width:25%;height:30;border:1px solid #ff901e;font-size:17;padding-left:5" readonly></td></tr>
+
+			<form name="mailQualification" id="mailQualification" action="../mail/contact_me.php" method="post">
+			
+			<input type="hidden" id="member_join_email_copy" name="member_join_email" readonly/>
+			<tr border=0>
+				<td align="center" style="padding-top:10">이메일 인증</td>
+				<td style="padding-top:10"><input type="button" name="member_join_btn_mail_verify" value="인증메일 발송" class="snip1535_list" onclick="javascipt:MailQual(this.form);" /></td>
+			</tr>
+
+			<tr border=0>
+				<td align="center">인증코드</td>
+				<td><input type="text" name="member_join_qualcode" style="width:25%;height:30;border:1px solid #ff901e;font-size:17;padding-left:5" /> <input type="button" name="member_join_btn_mail_verify_ok" value="확인" class="snip1535_list" onclick="javascript:MailQual_ok(this.form);"/><input type="text" name="qual_ok_text" id="qual_ok_text" style="border:0;background:white" disabled/>
+				<input type="hidden" id="qual_ok" name="qual_ok" /></td>
+			</tr>
+
+			</form>
+
+
+			</table>
+
+			</fieldset>
+
+
+
+
+			<fieldset style="width:80%;border:2pt solid #ff901e;margin-top:20">
+			<legend align="center"><font color="#ff901e">선택 정보 입력</font></legend>
+				
+			<table width=100%>
+			<tr><td align="center" width="16.5%">프로필 사진</td>
+				<td>
+					<div>
+					<button type="button" id="getimg" name="getimg" class="snip1535_list" style="position:absolute;cursor:pointer;width:120;height:40">이미지 업로드</button>
+					<input type="file" id="imgInp" name="memberimage" style="opacity:0;position:relative;width:120;height:40;margin-bottom:10"/>
+				<button type="button" id="reimg" name="reimg" class="snip1535_list" style="width:120;height:40;display:none;margin-bottom:10" onClick="javascript:onImageRe()">이미지 재선택</button></div>
+					<img id="blah" src="/member/memberimage/ico_noimg.png" alt="" width=80 height=80 style="padding-bottom:15" />
+					
+					<input type="hidden" name="memberimage_ok" value="" readonly/>
+				
+				
+				</td>
+			</tr>
+
+			<tr><td align="center" width="16.5%">주요 활동 분야<br>(질문&답변)</td>
+			<td>
+				<select name="major_activity" id="major_activity" style="border:0.5pt solid #ff901e">
+					<option value=1>모두</option>
+					<option value=2>중등 수학</option>
+					<option value=3>고등 수학</option>
+					<option value=4>대학 수학</option>
+				</select>
+			</td>
+			</tr>
+
+			<tr><td align="center" width="16.5%">관심있는 분야</td>
+			<td>
+				<input type="text" id="interesting_part" name="interesting_part" style="width:50%;height:30;border:0.5pt solid #ff901e" />
+			</tr>
+
+			<tr><td align="center" width="16.5%">자기소개</td>
+				<td><textarea name="introduce" id="introduce" style="width:100%;height:80;border:0.5pt solid #ff901e"></textarea></td>
+			</tr></table>
+	
+		
+			</fieldset>
+
+			<table border=0 width="82.5%" style="padding-top:20">
+			<tr><td width="40%" style=""><div><button type="button" name="member_join_confirm" onclick="javascript:ChkBeforeRegister();" class="snip1535" style="width:400">가입</button></div></td>
+				<td width="40%" style=""><div><button type="button" name="member_join_cancel" onclick="history.back();" class="snip1535" style="width:400">취소</button></div> </td></tr></table>
+	</form>
+
+  </div>
+
+  <div id="footer">
+	<?php
+	include("../frame_bottom.html");
+	?>
+  </div>
+</div>
+</body>
+

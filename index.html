@@ -1,0 +1,1144 @@
+<!-------------------------------------- index.html --------------------------------------->
+
+<?php
+
+	if(isset($_COOKIE['math_overflow_autologin_info']) && isset($_COOKIE['math_overflow_autologin_member_no_info']))
+	{
+		$conn = new mysqli("localhost", "root", "sdm9469", "math_overflow");
+		$dummy = "";
+		$sql_getdummy = "select autologin_dummy from status";
+		$result_getdummy = $conn->query($sql_getdummy);
+		if(!$result_getdummy) { echo "자동 로그인 에러"; }
+		else {
+			while($row_getdummy = $result_getdummy->fetch_assoc())
+			{	
+				$dummy = $row_getdummy['autologin_dummy'];
+			}
+		}
+		
+		if(password_verify(sprintf("%011d", $_COOKIE['math_overflow_autologin_member_no_info']) . $dummy, $_COOKIE['math_overflow_autologin_info']))
+		{
+			
+			//세션을 설정한다.
+			@session_start();
+			$sql_memberinfo = "select * from member where no=" . $_COOKIE['math_overflow_autologin_member_no_info'];
+			$result_memberinfo = $conn->query($sql_memberinfo);
+			if(!$result_memberinfo) { echo "쿠키 조작"; return;}
+			else
+			{
+				while($row_memberinfo = $result_memberinfo->fetch_assoc())
+				{
+					if($row_memberinfo["autologin_allowed"] == 0)
+					{
+
+						$conn = new mysqli("localhost", "root", "sdm9469", "math_overflow");
+						$sql_explicit_cookie_delete = "update member set autologin_cookie=0 where no=" . $_COOKIE['math_overflow_autologin_member_no_info'];
+						$result_explicit_cookie_delete = $conn->query($sql_explicit_cookie_delete);
+						if(!$result_explicit_cookie_delete) { echo "로그아웃 에러"; return; }
+
+						echo "<script>setCookie('math_overflow_autologin_info','',-1);</script>";
+						echo "<script>setCookie('math_overflow_autologin_member_no_info', '', -1);</script>";
+						@setcookie("math_overflow_autologin_info", "");
+						@setcookie("math_overflow_autologin_member_no_info", "");
+
+						
+					
+						
+						
+						@session_destroy();
+						
+					} else
+					{
+
+						$_SESSION['user_email'] = $row_memberinfo["email"];
+						$_SESSION['user_nickname'] = $row_memberinfo["nickname"];
+						$_SESSION['user_picture'] = $row_memberinfo["photopath"];
+						$_SESSION['user_member_no'] = $row_memberinfo["no"];	
+					}
+				}
+			}
+			$_SESSION['user_password'] = "MEMBER";
+
+			
+		}
+		else { echo "쿠키 조작 감지. 모든 쿠키 삭제 후 다시 페이지를 여세요."; return;}
+	}
+	else
+	{
+	}
+
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<style>
+
+
+
+</style>
+<script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}
+      });
+   </script>
+   <script> w3.includeHTML(); </script>
+
+
+<script language="javascript">
+
+
+
+	window.onload = function(){
+
+		//if(document.getElementById("type-selector-d").value == "" && document.getElementById("popup_disable").value == "enabled")
+		//{
+		//	window.open("/popup.html", "popup", "top=100,left=100,width=500,height=515,history=no,resizable=no,status=no,scrollbars=no,menubar=no");
+		//}
+ 
+		if(document.getElementById("service-one").getAttribute('class') == "tab-pane fade active in")
+		{
+			document.getElementById("active-tab").value= "popular";
+		}
+		else if(document.getElementById("service-two").getAttribute('class') == "tab-pane fade active in")
+		{
+			document.getElementById("active-tab").value = "recent";
+		}
+		else if(document.getElementById("service-three").getAttribute('class') == "tab-pane fade active in")
+		{
+			document.getElementById("active-tab").value = "noanswer";
+		}
+		else if(document.getElementById("service-four").getAttribute('class') == "tab-pane fade active in")
+		{
+			document.getElementById("active-tab").value = "community";
+		}
+		else if(document.getElementById("service-five").getAttribute('class') == "tab-pane fade active in")
+		{
+			document.getElementById("active-tab").value = "celebrity";
+		}
+		else
+		{
+			document.getElementById("active-tab").value = "popular";
+		}
+
+
+        var x = document.getElementById("type-selector").selectedIndex;
+        var y = document.getElementById("type-selector").options;
+        var z = document.getElementById("type-selector").value;
+ 
+		if(document.getElementById("type-selector-d").value == "all")
+		{
+			y[0].selected = true;
+			
+		}
+		else if(document.getElementById("type-selector-d").value == "middle")
+		{
+			y[1].selected = true;
+			
+		}
+		else if(document.getElementById("type-selector-d").value == "high")
+		{
+			
+			y[2].selected = true;
+			
+		}
+		else if(document.getElementById("type-selector-d").value == "univ")
+		{
+			y[3].selected = true;
+			
+		}
+		else
+		{
+			y[0].selected = true;
+		}
+        //순서대로 값을 띄워줍니다.
+        //alert("Index: " + y[x].index + " is " + y[x].text+" is " + z);
+ 
+    }
+
+		function NowTabChange(selected)
+		{
+			if(selected == 'popular')
+			{
+				document.getElementById("active-tab").value = "popular";
+			}
+			else if(selected == 'recent')
+			{
+				document.getElementById("active-tab").value = "recent";
+			}
+			else if(selected == 'noanswer')
+			{
+				document.getElementById("active-tab").value = "noanswer";
+			}
+			else if(selected == 'community')
+			{
+				document.getElementById("active-tab").value = "community";
+			}
+			else if(selected == 'celebrity')
+			{
+				document.getElementById("active-tab").value= "celebrity";
+			}
+			else
+			{
+				document.getElementById("active-tab").value = "popular";
+			}
+		}
+
+		function Adopted_onChanged(val)
+		{
+		
+			var tab = document.getElementById("active-tab").value;
+
+			if(val == "all")
+			{
+				document.getElementById("type-selector-d").value="all";
+				location.href="/index.html?type=all&tab=" + tab;
+			}
+			else if(val == "middle")
+			{
+
+				document.getElementById("type-selector-d").value="middle";
+				location.href="/index.html?type=middle&tab=" + tab;
+			}
+			else if(val == "high")
+			{	
+				
+				location.href="/index.html?type=high&tab=" + tab;
+				document.getElementById("type-selector-d").value="high";
+			}
+			else if(val == "univ")
+			{
+				document.getElementById("type-selector-d").value="univ";
+				location.href="/index.html?type=univ&tab=" + tab;
+			}
+			else
+			{
+				document.getElementById("type-selector-d").value="all";
+				location.href="/index.html?type=all&tab=" + tab;
+			}
+		}
+	</script>
+
+
+
+
+   <script src="https://www.w3schools.com/lib/w3.js"></script>
+   <script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+    <meta charset="UTF-8 | euc-kr">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Math Overflow - 수학 커뮤니티</title>
+
+	
+
+    <!-- Bootstrap Core CSS -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link href="css/half-slider.css" rel="stylesheet">
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+</head>
+
+<body>
+
+    <!-- Navigation -->
+      <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation" style="background:#ff901e;border:1pt solid #ff901e" >
+        <div class="container"  style="background:#ff901e">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header" style="background:#ff901e">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar" style="background:#ff901e"></span>
+                    <span class="icon-bar" style="background:#ff901e"></span>
+                    <span class="icon-bar" style="background:#ff901e"></span>
+                </button>
+                <a class="navbar-brand" href="index.html"><font color=white>MathOverflow</font></a>
+            </div>
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav navbar-right" >
+				<!--
+                    <li>
+                        <a href="about.html"><font color=white>About</font></a>
+                    </li>
+					-->
+
+				<?php
+					@session_start();
+                    echo "<li>";
+					if(isset($_SESSION['user_email']) && isset($_SESSION['user_password']))
+					{
+						echo "<a href=\"/member/logout.php\"><font color=white>로그아웃</font></a>";
+					}
+					else
+					{
+						 echo "<a href=\"/member/login.html\"><font color=white>로그인</font></a>";
+					}
+                    echo "</li>";
+
+					
+                    echo "<li>";
+					if(isset($_SESSION['user_email']) && isset($_SESSION['user_password']))
+					{
+						echo "<a href=\"/member/mypage.php\"><font color=white>마이페이지</font></a>";
+					}
+					else
+					{
+						echo "<a href=\"/member/join.html\"><font color=white>회원가입</font></a>";
+					}
+                    echo "</li>";
+				?>
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" style="background:#ff901e"><font color=white>중등 포럼<b class="caret"></font></b></a>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <a href="/boards/list_qna.php?boardname=board_middle_qna">질문답변 게시판</a>
+                            </li>
+
+							<!--
+                            <li>
+                                <a href="portfolio-2-col.html">나만의 Tip 게시판</font></a>
+                            </li>
+                            <li>
+                                <a href="portfolio-3-col.html">중등 Tip Best</a>
+                            </li>
+							 <li>
+                                <a href="portfolio-3-col.html">토론게시판</a>
+                            </li>
+							-->
+                            <li>
+                                <a href="/boards/list.php?boardname=board_middle_freeboard">자유게시판</a>
+                            </li>
+                  
+                        </ul>
+                    </li>
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" style="background:#ff901e"><font color=white>고등 포럼<b class="caret"></font></b></a>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <a href="/boards/list_qna.php?boardname=board_high_qna">질문답변 게시판</a>
+                            </li>
+							<!--
+                            <li>
+                                <a href="portfolio-2-col.html">나만의 Tip 게시판</a>
+                            </li>
+                            <li>
+                                <a href="portfolio-3-col.html">고등 Tip Best</a>
+                            </li>
+							<li>
+                                <a href="portfolio-3-col.html">토론게시판</a>
+                            </li>
+							-->
+                            <li>
+                                <a href="/boards/list.php?boardname=board_high_freeboard">자유게시판</a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" style="background:#ff901e"><font color=white>대학 포럼<b class="caret"></font></b></a>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <a href="/boards/list_qna.php?boardname=board_univ_qna">질문답변 게시판</a>
+                            </li>
+							
+                            <li>
+                                <a href="/boards/list.php?boardname=board_univ_freeboard">자유게시판</a>
+                            </li>
+							<!--
+							 <li>
+                                <a href="portfolio-3-col.html">토론게시판</a>
+                            </li>
+                            <li>
+                                <a href="#">미적분학</a>
+                            </li>
+							<li>
+                                <a href="#">선형대수학</a>
+                            </li>
+							<li>
+                                <a href="#">해석학</a>
+                            </li>
+							<li>
+                                <a href="#">미분방정식</a>
+                            </li>
+							<li>
+                                <a href="#">현대대수학</a>
+                            </li>
+							<li>
+                                <a href="#">위상수학</a>
+                            </li>
+							<li>
+                                <a href="#">이산수학</a>
+                            </li>
+							<li>
+                                <a href="#">기하학</a>
+                            </li>
+							<li>
+                                <a href="#">확률론/수리통계학</a>
+                            </li>
+							<li>
+                                <a href="#">미분기하학</a>
+                            </li>
+							<li>
+                                <a href="#">응용수학(금융, 경제, 보험)</a>
+                            </li>
+							<li>
+                                <a href="#">응용수학(IT, 암호)</a>
+                            </li>
+							-->
+                           
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+            <!-- /.navbar-collapse -->
+        </div>
+        <!-- /.container -->
+    </nav>
+
+   	<br><br><br><br>
+
+
+
+    <!-- Page Content -->
+	<?php
+		if(isset($_COOKIE['Math_Overflow_Main_Popup']))
+		{
+			echo "<input type='hidden' id='popup_disable' name='popup_disable' value='disabled' />";
+		}
+		else
+		{
+			echo "<input type='hidden' id='popup_disable' name='popup_disable' value='enabled' />";
+		}
+	?>
+	<br>
+    <div class="container">
+
+	<center> <div style="width:100%;margin-top:100"><img src="/img/img_mainlogo.png" style="margin-top:200"/> </div></center>
+
+		<br><br>
+	   <div class="row">
+
+             <div class="form-group">
+				<?php
+					echo "<input id=\"type-selector-d\" name=\"type-selector-d\" type=\"hidden\" value=\"" . $_GET['type'] . "\" />";
+					echo "<input id=\"active-tab\" name=\"active-tab\" type=\"hidden\" value=\"" . $_GET['tab'] . "\" />";
+				?>
+				<select id="type-selector" class="form-control" style="width:10%" onchange="javascript:Adopted_onChanged(this.value);">
+					<option value="all">전체</option>
+					<option value="middle">중등 포럼</option>
+					<option value="high">고등 포럼</option>
+					<option value="univ">대학 포럼</option>
+				</select>
+			</div>
+            <div class="col-lg-12">
+			
+			<?php
+                echo "<ul id='myTab' class='nav nav-tabs nav-justified'>";
+				
+				if($_GET['tab'] == "popular" || !isset($_GET['tab']) || ($_GET['tab'] != "recent" && $_GET['tab'] != "noanswer" && $_GET['tab'] != "community" && $_GET['tab'] != "celebrity"))
+					echo "<li class='active' onclick=\"javasciprt:NowTabChange('popular')\"><a href=\"#service-one\" data-toggle=\"tab\"><i class=\"fa fa-tree\"></i>인기 질문</a></li>";
+				else
+					echo "<li class='' onclick=\"javasciprt:NowTabChange('popular')\"><a href=\"#service-one\" data-toggle=\"tab\"><i class=\"fa fa-tree\"></i>인기 질문</a></li>";
+		
+				if($_GET['tab'] == "recent")
+					echo "<li class='active' onclick=\"javasciprt:NowTabChange('recent')\"><a href=\"#service-two\" data-toggle=\"tab\"><i class=\"fa fa-tree\"></i>최근 질문</a></li>";
+				else
+					echo "<li class='' onclick=\"javasciprt:NowTabChange('recent')\"><a href=\"#service-two\" data-toggle=\"tab\"><i class=\"fa fa-tree\"></i>최근 질문</a></li>";
+		
+				if($_GET['tab'] == "noanswer")
+					echo "<li class='active' onclick=\"javasciprt:NowTabChange('noanswer')\"><a href=\"#service-three\" data-toggle=\"tab\"><i class=\"fa fa-tree\"></i>답변이 필요한 질문</a></li>";
+				else
+					echo "<li class='' onclick=\"javasciprt:NowTabChange('noanswer')\"><a href=\"#service-three\" data-toggle=\"tab\"><i class=\"fa fa-tree\"></i>답변이 필요한 질문</a></li>";
+
+				if($_GET['tab'] == "community")
+					echo "<li class='active' onclick=\"javasciprt:NowTabChange('community')\"><a href=\"#service-four\" data-toggle=\"tab\"><i class=\"fa fa-tree\"></i>커뮤니티</a></li>";
+				else
+					echo "<li class='' onclick=\"javasciprt:NowTabChange('community')\"><a href=\"#service-four\" data-toggle=\"tab\"><i class=\"fa fa-tree\"></i>커뮤니티</a></li>";
+				/*
+				if($_GET['tab'] == "celebrity")
+					echo "<li class='active' onclick=\"javasciprt:NowTabChange('celebrity')\"><a href=\"#service-five\" data-toggle=\"tab\"><i class=\"fa fa-tree\"></i>인기인</a></li>";
+				else
+					echo "<li class='' onclick=\"javasciprt:NowTabChange('celebrity')\"><a href=\"#service-five\" data-toggle=\"tab\"><i class=\"fa fa-tree\"></i>인기인</a></li>";
+				*/
+				echo "</ul>";
+			?>
+
+                <div id="myTabContent" class="tab-content">
+					<!-- 인기 질문 -->
+					<?php
+						if($_GET['tab'] == "popular" || !isset($_GET['tab']) || ($_GET['tab'] != "recent" && $_GET['tab'] != "noanswer" && $_GET['tab'] != "community" && $_GET['tab'] != "celebrity"))
+							echo "<div class=\"tab-pane fade active in\" id=\"service-one\">";
+						else
+							echo "<div class=\"tab-pane fade\" id=\"service-one\">";
+					?>
+						
+					<br>
+                       <?php
+							$servername = "localhost";
+							$username = "root";
+							$password = "sdm9469";
+							$dbname = "math_overflow";
+
+							$conn = new mysqli($servername, $username, $password, $dbname);
+
+							if($conn->connect_error) {
+								die("MYSQL 연동에 실패하였습니다: " . $conn->connect_error); }
+							else { }
+
+
+							$type = "";
+								if(!isset($_GET['type'])){
+									$type = "all"; 
+								} else	{
+									$type = $_GET['type'];
+								}
+
+							if($type != "all" && $type != "middle" && $type != "high" && $type != "univ")
+								$type = "all";
+							
+							$sql = "";
+
+							if($type != "all")
+							{
+								$sql = "SELECT * FROM board_" . $type . "_qna ORDER BY vote DESC limit 10";
+								
+							}
+							else
+							{
+								$sql = "SELECT * FROM board_middle_qna union
+										SELECT * FROM board_high_qna union
+										SELECT * FROM board_univ_qna ORDER BY vote DESC limit 10";
+							}
+							$result = $conn->query($sql);
+							if(!$result) { echo "쿼리 에러\n\n"; }
+
+
+
+							$n = 0;
+							if($result->num_rows > 0)
+							{
+								
+								while($row = $result->fetch_assoc())
+								{	
+									$boardname = "board_" . $row['type'] . "_qna";
+							
+									echo "<table border=0 width=100% style=\"border-collapse:collapse;border:0px gray solid;word-break:break-all\">";
+									echo "<colgroup><col style=\"10%\"><col style=\"70%\"><col style=\"20%\"></colgroup>";
+									echo "<tr>";
+
+									#관심있어요
+									echo "<td rowspan=2 width=\"100\"><center>";
+									echo "관심<br><font size=5><b>" . $row["vote"];
+									echo "</font></b></center></td>";
+
+									#제목
+									$title_dummy = "";
+									if($_GET['type'] == "all" || !isset($_GET['type']) || ($_GET['type'] != "middle" && $_GET['type'] != "high" && $_GET['type'] != "univ"))
+									{
+										if($row['type'] == "middle") { $title_dummy = "[중등] "; }
+										else if($row['type'] == "high") { $title_dummy = "[고등] "; }
+										else if($row['type'] == "univ") { $title_dummy = "[대학] "; }
+									}
+									
+									echo "<td colspan=2 style=\"overflow:hidden;text-overflow:ellipsis;white-space:nowrap;\">";
+									echo "<a href=\"/boards/view_qna.php?boardname=" . $boardname . "&no=" . $row["no"] . "\" style=\"text-decoration:none\"><font color=#1e90ff size=4><b><div style=\"max-width:900px\">";
+									if($row['imgpath1'] != "" || $row['imgpath2'] != "" || $row['imgpath3'] != "")
+									{
+										echo "<img src='/boards/img/picture_yes.png' width=25 height=25> &nbsp;";
+									} else
+									{
+										echo "<img src='/boards/img/picture_no.png' width=25 height=25> &nbsp;";
+									}
+									echo $title_dummy .htmlspecialchars($row["title"]) . "</b></font></a>";
+									echo "</div></td>";
+									echo "</tr>";
+
+									#내용
+									echo "<tr style=\"word-break:break-all\">";
+									echo "<td style=\"vertical-align:top;overflow:hidden;text-overflow:ellipsis;white-space:pre-line;word-wrap:break-word;word-break:break-all;table-layout:fixed;\" width=680 rowspan=3><div style=\"height:60px;overflow:hidden;text-overflow:ellipsis\">" . htmlspecialchars($row["content"]);
+									echo "</div></td>";
+
+									#특이사항
+									echo "<td><center><b>" . $row["points"];
+									echo "</b> 포인트</center></td>";
+									echo "</tr>";
+
+									#답변
+									echo "<td rowspan=2><center>";
+									echo "답변<br><font size=5><b>" . $row["answers"];
+									echo "</font></b></center></td>";
+
+									#일시
+									echo "<td><center>";
+									$datenow = time();
+									$dateword = strtotime($row["date"]);
+									$datediff = $datenow - $dateword;
+									if($datediff < 60)
+									{
+										echo floor($datediff) . "초 전";
+									}
+									else if($datediff < 3600)
+									{
+										echo floor($datediff / 60) . "분 전";
+									}
+									else if($datediff / 3600 < 6)
+									{
+										echo floor($datediff / 3600) . "시간 전";
+									}
+									else if(date("d", time()) == date("d", strtotime($row["date"])))
+									{
+										echo date("h:i", strtotime($row["date"]));
+									}
+									else
+									{
+										$dateonedayoff = date("Y-m-d", strtotime($row["date"]));
+										echo $dateonedayoff;
+									}
+									echo "</center></td>";
+									echo "</tr>";
+
+									#작성자
+									echo "<tr>";
+									echo "<td rowspan=2><center>" . htmlspecialchars($row["writer"]);
+									echo "</center></td>";
+									echo "</tr>";
+
+									#조회수
+									echo "<tr>";
+									echo "<td><center>조회수: " . $row["hit"];
+									echo "</center></td>";
+
+									#태그
+									echo "<td>" . $row["tags"];
+									echo "</td>";
+									echo "</tr>";
+									echo "</table>";
+
+									echo "<br>";
+									echo "<hr align=\"left\" width=100% color=\"#bbbbbb\" size=\"0.4px\" />";
+									echo "<br>";
+									$n ++;
+								
+								}
+
+
+							} else { echo "등록된 글이 없습니다."; }
+
+					   ?>
+
+
+                    </div>
+
+					<!-- 최근 질문 -->
+                    <?php
+						if($_GET['tab'] == "recent")
+							echo "<div class=\"tab-pane fade active in\" id=\"service-two\">";
+						else
+							echo "<div class=\"tab-pane fade\" id=\"service-two\">";
+					?>
+					<br>
+                          <?php
+							$servername = "localhost";
+							$username = "root";
+							$password = "sdm9469";
+							$dbname = "math_overflow";
+
+							$conn = new mysqli($servername, $username, $password, $dbname);
+
+							if($conn->connect_error) {
+								die("MYSQL 연동에 실패하였습니다: " . $conn->connect_error); }
+							else { }
+
+
+							$type = "";
+								if(!isset($_GET['type'])){
+									$type = "all"; 
+								} else	{
+									$type = $_GET['type'];
+								}
+							
+							$sql = "";
+
+							if($type != "all" && $type != "middle" && $type != "high" && $type != "univ")
+								$type = "all";
+
+							if($type == "all")
+							{
+								$sql = "SELECT * FROM board_middle_qna union
+										SELECT * FROM board_high_qna union
+										SELECT * FROM board_univ_qna ORDER BY date DESC limit 10";
+							}
+							else
+							{
+								$sql = "SELECT * FROM board_" . $type . "_qna ORDER BY date DESC limit 10";
+								
+							}
+							$result = $conn->query($sql);
+							if(!$result) { echo "쿼리 에러"; }
+
+
+
+							$n = 0;
+							$array_exception;
+							$array_exception_type;
+
+							if($result->num_rows > 0)
+							{
+			
+								while($row = $result->fetch_assoc())
+								{	
+									$boardname = "board_" . $row['type'] . "_qna";
+									$array_exception[$n] = $row['no'];
+									$array_exception_type[$n] = $row['type'];
+									echo "<table border=0 width=100% style=\"border-collapse:collapse;border:0px gray solid;word-break:break-all\">";
+									echo "<colgroup><col style=\"10%\"><col style=\"70%\"><col style=\"20%\"></colgroup>";
+									echo "<tr>";
+
+									#관심있어요
+									echo "<td rowspan=2 width=\"100\"><center>";
+									echo "관심<br><font size=5><b>" . $row["vote"];
+									echo "</font></b></center></td>";
+
+									#제목
+									$title_dummy = "";
+									if($_GET['type'] == "all" || !isset($_GET['type']) || ($_GET['type'] != "middle" && $_GET['type'] != "high" && $_GET['type'] != "univ"))
+									{
+										if($row['type'] == "middle") { $title_dummy = "[중등] "; }
+										else if($row['type'] == "high") { $title_dummy = "[고등] "; }
+										else if($row['type'] == "univ") { $title_dummy = "[대학] "; }
+									}
+									echo "<td colspan=2 style=\"overflow:hidden;text-overflow:ellipsis;white-space:nowrap;\">";
+									echo "<a href=\"/boards/view_qna.php?boardname=" . $boardname . "&no=" . $row["no"] . "\" style=\"text-decoration:none\"><font color=#1e90ff size=4><b><div style=\"max-width:900px\">";
+									if($row['imgpath1'] != "" || $row['imgpath2'] != "" || $row['imgpath3'] != "")
+									{
+										echo "<img src='/boards/img/picture_yes.png' width=25 height=25> &nbsp;";
+									} else
+									{
+										echo "<img src='/boards/img/picture_no.png' width=25 height=25> &nbsp;";
+									}
+									echo $title_dummy . htmlspecialchars($row["title"]) . "</b></font></a>";
+									echo "</div></td>";
+									echo "</tr>";
+
+									#내용
+									echo "<tr style=\"word-break:break-all\">";
+									echo "<td style=\"vertical-align:top;overflow:hidden;text-overflow:ellipsis;white-space:pre-line;word-wrap:break-word;word-break:break-all;table-layout:fixed;\" width=680 rowspan=3><div style=\"height:60px;overflow:hidden;text-overflow:ellipsis\">" . htmlspecialchars($row["content"]);
+									echo "</div></td>";
+
+									#특이사항
+									echo "<td><center><b>" . $row["points"];
+									echo "</b> 포인트</center></td>";
+									echo "</tr>";
+
+									#답변
+									echo "<td rowspan=2><center>";
+									echo "답변<br><font size=5><b>" . $row["answers"];
+									echo "</font></b></center></td>";
+
+									#일시
+									echo "<td><center>";
+									$datenow = time();
+									$dateword = strtotime($row["date"]);
+									$datediff = $datenow - $dateword;
+									if($datediff < 60)
+									{
+										echo floor($datediff) . "초 전";
+									}
+									else if($datediff < 3600)
+									{
+										echo floor($datediff / 60) . "분 전";
+									}
+									else if($datediff / 3600 < 6)
+									{
+										echo floor($datediff / 3600) . "시간 전";
+									}
+									else if(date("d", time()) == date("d", strtotime($row["date"])))
+									{
+										echo date("h:i", strtotime($row["date"]));
+									}
+									else
+									{
+										$dateonedayoff = date("Y-m-d", strtotime($row["date"]));
+										echo $dateonedayoff;
+									}
+									echo "</center></td>";
+									echo "</tr>";
+
+									#작성자
+									echo "<tr>";
+									echo "<td rowspan=2><center>" . htmlspecialchars($row["writer"]);
+									echo "</center></td>";
+									echo "</tr>";
+
+									#조회수
+									echo "<tr>";
+									echo "<td><center>조회수: " . $row["hit"];
+									echo "</center></td>";
+
+									#태그
+									echo "<td>" . $row["tags"];
+									echo "</td>";
+									echo "</tr>";
+									echo "</table>";
+
+									echo "<br>";
+									echo "<hr align=\"left\" width=100% color=\"#bbbbbb\" size=\"0.3px\" />";
+									echo "<br>";
+									$n ++;
+								
+								}
+
+
+							} else { echo "등록된 글이 없습니다."; }
+
+					   ?>
+                    </div>
+
+					<!-- 답변 없는 질문 -->
+                    <?php
+						if($_GET['tab'] == "noanswer")
+							echo "<div class=\"tab-pane fade active in\" id=\"service-three\">";
+						else
+							echo "<div class=\"tab-pane fade\" id=\"service-three\">";
+					?>
+                	<br>
+                          <?php
+							$servername = "localhost";
+							$username = "root";
+							$password = "sdm9469";
+							$dbname = "math_overflow";
+
+							$conn = new mysqli($servername, $username, $password, $dbname);
+
+							if($conn->connect_error) {
+								die("MYSQL 연동에 실패하였습니다: " . $conn->connect_error); }
+							else { }
+
+
+							$type = "";
+								if(!isset($_GET['type'])){
+									$type = "all"; 
+								} else	{
+									$type = $_GET['type'];
+								}
+							
+							$sql = "";
+
+							if($type != "all" && $type != "middle" && $type != "high" && $type != "univ")
+								$type = "all";
+
+							if($type == "all")
+							{
+						
+								$sql = "SELECT * FROM board_middle_qna where NOT(no=" . $array_exception[0] . " AND type=\"" . $array_exception_type[0] . "\") AND NOT(no=" . $array_exception[1] . " AND type=\"" . $array_exception_type[1] . "\") AND NOT(no=" . $array_exception[2] . " AND type=\"" . $array_exception_type[2] . "\") AND NOT(no=" . $array_exception[3] . " AND type=\"" . $array_exception_type[3] . "\") AND NOT(no=" . $array_exception[4] . " AND type=\"" . $array_exception_type[4] . "\") AND NOT(no=" . $array_exception[5] . " AND type=\"" . $array_exception_type[5] . "\") AND NOT(no=" . $array_exception[6] . " AND type=\"" . $array_exception_type[6] . "\") AND NOT(no=" . $array_exception[7] . " AND type=\"" . $array_exception_type[7] . "\") AND NOT(no=" . $array_exception[8] . " AND type=\"" . $array_exception_type[8] . "\") AND NOT(no=" . $array_exception[9] . " AND type=\"" . $array_exception_type[9] . "\") union
+								SELECT * FROM board_high_qna where NOT(no=" . $array_exception[0] . " AND type=\"" . $array_exception_type[0] . "\") AND NOT(no=" . $array_exception[1] . " AND type=\"" . $array_exception_type[1] . "\") AND NOT(no=" . $array_exception[2] . " AND type=\"" . $array_exception_type[2] . "\") AND NOT(no=" . $array_exception[3] . " AND type=\"" . $array_exception_type[3] . "\") AND NOT(no=" . $array_exception[4] . " AND type=\"" . $array_exception_type[4] . "\") AND NOT(no=" . $array_exception[5] . " AND type=\"" . $array_exception_type[5] . "\") AND NOT(no=" . $array_exception[6] . " AND type=\"" . $array_exception_type[6] . "\") AND NOT(no=" . $array_exception[7] . " AND type=\"" . $array_exception_type[7] . "\") AND NOT(no=" . $array_exception[8] . " AND type=\"" . $array_exception_type[8] . "\") AND NOT(no=" . $array_exception[9] . " AND type=\"" . $array_exception_type[9] . "\") union
+								SELECT * FROM board_univ_qna where NOT(no=" . $array_exception[0] . " AND type=\"" . $array_exception_type[0] . "\") AND NOT(no=" . $array_exception[1] . " AND type=\"" . $array_exception_type[1] . "\") AND NOT(no=" . $array_exception[2] . " AND type=\"" . $array_exception_type[2] . "\") AND NOT(no=" . $array_exception[3] . " AND type=\"" . $array_exception_type[3] . "\") AND NOT(no=" . $array_exception[4] . " AND type=\"" . $array_exception_type[4] . "\") AND NOT(no=" . $array_exception[5] . " AND type=\"" . $array_exception_type[5] . "\") AND NOT(no=" . $array_exception[6] . " AND type=\"" . $array_exception_type[6] . "\") AND NOT(no=" . $array_exception[7] . " AND type=\"" . $array_exception_type[7] . "\") AND NOT(no=" . $array_exception[8] . " AND type=\"" . $array_exception_type[8] . "\") AND NOT(no=" . $array_exception[9] . " AND type=\"" . $array_exception_type[9] . "\") order by answers asc limit 10";
+							}
+							else
+							{
+								$sql = "SELECT * FROM board_" . $type . "_qna WHERE no NOT IN (" . $array_exception[0] . ","  . $array_exception[1] . ","  . $array_exception[2] . ","  . $array_exception[3] . ","  . $array_exception[4] . ","  . $array_exception[5] . ","  . $array_exception[6] . ","  . $array_exception[7] . ","  . $array_exception[8] . ","  . $array_exception[9] . ") order by answers asc limit 10"; 
+								
+							}
+							$result = $conn->query($sql);
+							if(!$result) { echo "쿼리 에러"; }
+
+
+
+							$n = 0;
+							if($result->num_rows > 0)
+							{
+								
+								while($row = $result->fetch_assoc())
+								{	
+									$boardname = "board_" . $row['type'] . "_qna";
+							
+									echo "<table border=0 width=100% style=\"border-collapse:collapse;border:0px gray solid;word-break:break-all\">";
+									echo "<colgroup><col style=\"10%\"><col style=\"70%\"><col style=\"20%\"></colgroup>";
+									echo "<tr>";
+
+									#관심있어요
+									echo "<td rowspan=2 width=\"100\"><center>";
+									echo "관심<br><font size=5><b>" . $row["vote"];
+									echo "</font></b></center></td>";
+
+									#제목
+									$title_dummy = "";
+									if($_GET['type'] == "all" || !isset($_GET['type']) || ($_GET['type'] != "middle" && $_GET['type'] != "high" && $_GET['type'] != "univ"))
+									{
+										if($row['type'] == "middle") { $title_dummy = "[중등] "; }
+										else if($row['type'] == "high") { $title_dummy = "[고등] "; }
+										else if($row['type'] == "univ") { $title_dummy = "[대학] "; }
+									}
+									echo "<td colspan=2 style=\"overflow:hidden;text-overflow:ellipsis;white-space:nowrap;\">";
+									echo "<a href=\"/boards/view_qna.php?boardname=" . $boardname . "&no=" . $row["no"] . "\" style=\"text-decoration:none\"><font color=#1e90ff size=4><b><div style=\"max-width:900px\">";
+									if($row['imgpath1'] != "" || $row['imgpath2'] != "" || $row['imgpath3'] != "")
+									{
+										echo "<img src='/boards/img/picture_yes.png' width=25 height=25> &nbsp;";
+									} else
+									{
+										echo "<img src='/boards/img/picture_no.png' width=25 height=25> &nbsp;";
+									}
+									
+									echo $title_dummy . htmlspecialchars($row["title"]) . "</b></font></a>";
+									echo "</div></td>";
+									echo "</tr>";
+
+									#내용
+									echo "<tr style=\"word-break:break-all\">";
+									echo "<td style=\"vertical-align:top;overflow:hidden;text-overflow:ellipsis;white-space:pre-line;word-wrap:break-word;word-break:break-all;table-layout:fixed;\" width=680 rowspan=3><div style=\"height:60px;overflow:hidden;text-overflow:ellipsis\">" . htmlspecialchars($row["content"]);
+									echo "</div></td>";
+
+									#특이사항
+									echo "<td><center><b>" . $row["points"];
+									echo "</b> 포인트</center></td>";
+									echo "</tr>";
+
+									#답변
+									echo "<td rowspan=2><center>";
+									echo "답변<br><font size=5><b>" . $row["answers"];
+									echo "</font></b></center></td>";
+
+									#일시
+									echo "<td><center>";
+									$datenow = time();
+									$dateword = strtotime($row["date"]);
+									$datediff = $datenow - $dateword;
+									if($datediff < 60)
+									{
+										echo floor($datediff) . "초 전";
+									}
+									else if($datediff < 3600)
+									{
+										echo floor($datediff / 60) . "분 전";
+									}
+									else if($datediff / 3600 < 6)
+									{
+										echo floor($datediff / 3600) . "시간 전";
+									}
+									else if(date("d", time()) == date("d", strtotime($row["date"])))
+									{
+										echo date("h:i", strtotime($row["date"]));
+									}
+									else
+									{
+										$dateonedayoff = date("Y-m-d", strtotime($row["date"]));
+										echo $dateonedayoff;
+									}
+									echo "</center></td>";
+									echo "</tr>";
+
+									#작성자
+									echo "<tr>";
+									echo "<td rowspan=2><center>" . htmlspecialchars($row["writer"]);
+									echo "</center></td>";
+									echo "</tr>";
+
+									#조회수
+									echo "<tr>";
+									echo "<td><center>조회수: " . $row["hit"];
+									echo "</center></td>";
+
+									#태그
+									echo "<td>" . $row["tags"];
+									echo "</td>";
+									echo "</tr>";
+									echo "</table>";
+
+									echo "<br>";
+									echo "<hr align=\"left\" width=100% color=\"#bbbbbb\" size=\"0.4px\" />";
+									echo "<br>";
+									$n ++;
+								
+								}
+
+
+							} else { echo "등록된 글이 없습니다."; }
+
+					   ?>
+                    </div>
+
+					<!-- 커뮤니티 -->
+                    <?php
+						if($_GET['tab'] == "community")
+							echo "<div class=\"tab-pane fade active in\" id=\"service-four\">";
+						else
+							echo "<div class=\"tab-pane fade\" id=\"service-four\">";
+					?>
+						<br>
+						    <?php
+							$servername = "localhost";
+							$username = "root";
+							$password = "sdm9469";
+							$dbname = "math_overflow";
+
+							$conn = new mysqli($servername, $username, $password, $dbname);
+
+							if($conn->connect_error) {
+								die("MYSQL 연동에 실패하였습니다: " . $conn->connect_error); }
+							else { }
+
+
+							$type = "";
+								if(!isset($_GET['type'])){
+									$type = "all"; 
+								} else	{
+									$type = $_GET['type'];
+								}
+							
+							$sql = "";
+
+							if($type != "all" && $type != "middle" && $type != "high" && $type != "univ")
+								$type = "all";
+
+							if($type == "all")
+							{
+								$sql = "SELECT * FROM board_middle_freeboard union
+										SELECT * FROM board_high_freeboard union
+										SELECT * FROM board_univ_freeboard ORDER BY date DESC limit 15";
+							}
+							else
+							{
+								$sql = "SELECT * FROM board_" . $type . "_freeboard ORDER BY date DESC limit 15";
+								
+							}
+							$result = $conn->query($sql);
+							if(!$result) { echo "쿼리 에러"; }
+
+
+
+							$n = 0;
+							$array_exception;
+							$array_exception_type;
+							echo "<table style='width:100%'>";
+							echo "<tr>";
+							echo "<td style='width:60%'><b><center>제목</center></b></td>";
+							echo "<td style='width:20%'><b><center>작성자</center></b></td>";
+							echo "<td style='width:20%'><b><center>작성일시</center></b></td>";
+							echo "</tr></table>";
+							echo "<br>";
+							if($result->num_rows > 0)
+							{
+								while($row = $result->fetch_assoc())
+								{	
+									$boardname = "board_" . $row['type'] . "_freeboard";
+
+									$title_dummy = "";
+									if($_GET['type'] == "all" || !isset($_GET['type']) || ($_GET['type'] != "middle" && $_GET['type'] != "high" && $_GET['type'] != "univ"))
+									{
+										if($row['type'] == "middle") { $title_dummy = "[중등] "; }
+										else if($row['type'] == "high") { $title_dummy = "[고등] "; }
+										else if($row['type'] == "univ") { $title_dummy = "[대학] "; }
+									}
+				
+									echo "<a href=/boards/view.php?boardname=" . $boardname . "&no=" . $row['no'] . " style=\"text-decoration:none\"><font color=black>";
+									echo "<table height=50 style=\"border-collapse:separate;width:100%;height:50;border-radius:18px\"><tr><td style=\"margin-bottom:10pt;background:#ffdebc;width:60%;height:50;border:1pt solid #ffdebc;border-radius:18px;margin-right:10\">　";
+									if($row['imgpath1'] != "" || $row['imgpath2'] != "" || $row['imgpath3'] != "")
+									{
+										echo "<img src='/boards/img/picture_yes.png' width=20 height=20> &nbsp;";
+									} else
+									{
+										echo "<img src='/boards/img/picture_no.png' width=20 height=20> &nbsp;";
+									}
+									echo $title_dummy . htmlspecialchars($row['title']). "</td>";
+									echo "<td style=\"margin-bottom:10pt;background:#ffdebc;width:20%;height:50;border:1pt solid #ffdebc;border-radius:18px;margin-right:10\"><center>" . $row['writer']. "</center></td>";
+									echo "<td style=\"margin-bottom:10pt;background:#ffdebc;width:20%;height:50;border:1pt solid #ffdebc;border-radius:18px\">";
+									echo "<center>";
+									
+										$datenow = time();
+										$dateword = strtotime($row["date"]);
+										$datediff = $datenow - $dateword;
+										if($datediff < 60)
+										{
+											echo floor($datediff) . "초 전";
+										}
+										else if($datediff < 3600)
+										{
+											echo floor($datediff / 60) . "분 전";
+										}
+										else if($datediff / 3600 < 6)
+										{
+											echo floor($datediff / 3600) . "시간 전";
+										}
+										else if(date("d", time()) == date("d", strtotime($row["date"])))
+										{
+											echo date("h:i", strtotime($row["date"]));
+										}
+										else
+										{
+											$dateonedayoff = date("Y-m-d", strtotime($row["date"]));
+											echo $dateonedayoff;
+										}
+
+									echo "</center></td></tr></table><br>";
+									echo "</font></a>";
+									
+								}
+							} else { echo "등록된 글이 없습니다."; }
+
+					   ?>
+						
+                        
+                    </div>
+					<!--
+					 <?php
+						if($_GET['tab'] == "celebrity")
+							echo "<div class=\"tab-pane fade active in\" id=\"service-five\">";
+						else
+							echo "<div class=\"tab-pane fade\" id=\"service-five\">";
+					?>
+                        <h4>인기인</h4>
+                        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quae repudiandae fugiat illo cupiditate excepturi esse officiis consectetur, laudantium qui voluptatem. Ad necessitatibus velit, accusantium expedita debitis impedit rerum totam id. Lorem ipsum dolor sit amet, consectetur adipisicing elit. Natus quibusdam recusandae illum, nesciunt, architecto, saepe facere, voluptas eum incidunt dolores magni itaque autem neque velit in. At quia quaerat asperiores.</p>
+                        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quae repudiandae fugiat illo cupiditate excepturi esse officiis consectetur, laudantium qui voluptatem. Ad necessitatibus velit, accusantium expedita debitis impedit rerum totam id. Lorem ipsum dolor sit amet, consectetur adipisicing elit. Natus quibusdam recusandae illum, nesciunt, architecto, saepe facere, voluptas eum incidunt dolores magni itaque autem neque velit in. At quia quaerat asperiores.</p>
+						
+                    </div>
+					-->
+                </div>
+
+            </div>
+        </div>
+
+
+        <hr>
+
+        <!-- Footer -->
+        <footer>
+            <div class="row">
+                <div class="col-lg-12">
+                    <p>Copyright &copy; Math Overflow 2017</p>
+                </div>
+            </div>
+            <!-- /.row -->
+        </footer>
+
+    </div>
+    <!-- /.container -->
+
+    <!-- jQuery -->
+    <script src="js/jquery.js"></script>
+
+    <!-- Bootstrap Core JavaScript -->
+    <script src="js/bootstrap.min.js"></script>
+
+    <!-- Script to Activate the Carousel -->
+    <script>
+    $('.carousel').carousel({
+        interval: 5000 //changes the speed
+    })
+    </script>
+
+</body>
+
+</html>

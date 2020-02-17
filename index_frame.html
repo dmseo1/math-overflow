@@ -1,0 +1,152 @@
+<html>
+<head>
+
+ <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}
+      });
+   </script>
+
+   <script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+ <script src="https://www.w3schools.com/lib/w3.js"></script>
+  <script> w3.includeHTML(); </script>
+
+<style>
+    .middle a{cursor:pointer;}
+    .middle .hide{display:none;}
+	.high a{cursor:pointer;}
+    .high .hide{display:none;}
+	.univ a{cursor:pointer;}
+    .univ .hide{display:none;}
+</style>
+
+ <script>
+
+
+  Detail_middle(false);
+  Detail_high(false);
+  Detail_univ(false);
+ 
+    function Detail_middle(isShow) {
+        if (isShow)
+        {
+            SimpleForm_middle.hidden = true;
+            DetailForm_middle.hidden = false;
+        }
+        else
+        {
+            SimpleForm_middle.hidden = false;
+            DetailForm_middle.hidden = true;
+        }
+    }
+
+
+
+	function Detail_high(isShow) {
+        if (isShow)
+        {
+            SimpleForm_high.hidden = true;
+            DetailForm_high.hidden = false;
+        }
+        else
+        {
+            SimpleForm_high.hidden = false;
+            DetailForm_high.hidden = true;
+        }
+    }
+
+
+
+	function Detail_univ(isShow) {
+        if (isShow)
+        {
+            SimpleForm_univ.hidden = true;
+            DetailForm_univ.hidden = false;
+        }
+        else
+        {
+            SimpleForm_univ.hidden = false;
+            DetailForm_univ.hidden = true;
+        }
+    }
+
+ </script>
+
+
+
+
+
+<meta charset="utf-8">
+<style type="text/css">
+
+#header
+{
+	background:#ff901e;
+	padding-left:20;
+    padding-right:50;
+    padding-top:50;
+    padding-bottom:20;
+	border:0
+}
+
+#leftmenu
+{
+  float:left;
+  width:20%;
+  margin-bottom:30;
+  border:0;
+}
+
+#content
+{
+  float:right;
+  width: 80%;
+  margin-bottom:30;
+  border:0;
+}
+
+#footer
+{
+  clear:both;
+  background:black;
+  padding-left:5;
+  padding-right:5;
+  padding-top:5;
+  padding-bottom:5;
+  border:0;
+}
+</style>
+</head>
+
+<body>
+
+<div id="wrap">
+  <div id="header">
+    <h1>Math Overflow - 수학 커뮤니티</h1>
+  </div>
+
+  <div id="leftmenu">
+	
+
+	<?php
+		include("frame_left.html");
+	?>
+
+  </div>
+
+  <div id="content" name="content">
+
+
+  <iframe name="main" src="index.html" frameborder="0" width="100%" height="100%"></iframe>
+
+
+
+  </div>
+
+  <div id="footer">
+	<font color="white">
+     Math Overflow / 사업자: 서동민 / 사업장 소재지: 서울시 동대문구 휘경2동 286-344 502-1호 / 010-2071-6474 </font>
+  </div>
+</div>
+</body>
+

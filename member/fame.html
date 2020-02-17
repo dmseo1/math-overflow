@@ -1,0 +1,187 @@
+<html>
+<head>
+	<title>회원 가입</title>
+ <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}
+      });
+    </script>
+    <script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+
+	<script language="javascript">
+		function Adopted_onChanged()
+		{
+			alert("바뀜!!");
+			location.href("/member/fame.php?adopted_type=middle");
+
+			if(document.getElememtById("adopted_category").value == "종합")
+				location.href="/member/fame.php?adopted_type=all";
+				
+			else if(document.getElementById("adopted_category").value == "중등 포럼")
+				location.href="/member/fame.php?adopted_type=middle";
+			
+			else if(document.getElementById("adopted_category").value == "고등 포럼")
+				location.href="/member/fame.php?adopted_type=high";
+
+			else if(document.getElementById("adopted_category").value == "대학 포럼")
+				location.href="/member/fame.php?adopted_type=univ";
+				
+			else
+				alert("예기치 않은 오류가 발생하였습니다");
+		}
+	</script>
+
+
+
+<meta charset="utf-8">
+	<link rel="stylesheet" type="text/css" href="/framestyle.css" />
+</head>
+
+<body>
+
+<div id="wrap">
+  <div id="header">
+    <?php
+	include("../frame_top.html");
+    ?>
+  </div>
+
+  <div id="sidebar">
+    <?php
+	include("../frame_left.html");
+    ?>
+  </div>
+
+  <div id="content">
+
+  <!-- DB 연동 -->
+  <?php
+	 $adopted_type = $_GET["adopted_type"];
+	 echo "소리쳐!!: " . $adopted_type;
+	 if($adopted_type == "")
+		$adopted_type = "all";
+
+
+	 echo "소리쳐!!2: " . $adopted_type;
+	 $conn = new mysqli("localhost", "root", "sdm9469", "math_overflow");
+
+	 if($conn->connect_error) {
+		die("MYSQL 연동에 실패하였습니다: " . $conn->connect_error); }
+	 else { }
+  ?>
+
+
+
+	<h3>명예의 전당</h3>
+	
+
+	<div style="width:40% float:left">
+	<h4>포인트 랭킹</h4>
+		<table style="width:95%">
+			<tr>
+				<td style="width:15%">순위</td>
+				<td style="width:50%">닉네임</td>
+				<td style="width:35%">포인트</td>
+			</tr>
+
+			<?php
+				$sql_points = "select * from member order by points desc";
+				$result_points = $conn->query($sql_points);
+				
+				$num = 1;
+				if($result_points)
+				{
+					while($row_points = $result_points->fetch_assoc())
+					{
+						echo "<tr>
+								<td>" . $num . "</td>
+								<td>" . $row_points["nickname"] . "</td>
+								<td>" . $row_points["points"] . "</td></tr>";
+						$num++;
+					}
+
+				}
+				else
+				{
+					echo "쿼리 에러";
+				}
+			?>
+
+		</table>
+	</div>
+
+	<div style="width:40% float:right">
+	<h4>채택수 랭킹</h4>
+
+		<select id="adopted_category" name="category" style="border:1px solid #ff901e" onchange="javascript:Adopted_onChanged();">
+				<option value='total'>종합</option>
+				<option value='middle'>중등 포럼</option>
+				<option value='high'>고등 포럼</option>
+				<option value='univ'>대학 포럼</option>
+		</select>
+
+		<input id="adopted_category_d" name="adopted_cateogry_d" type="hidden" />
+
+
+		<table>
+			<tr>
+				<td style="width:15%">순위</td>
+				<td style="width:50%">닉네임</td>
+				<td style="width:35%">채택수</td>
+			</tr>
+	
+			<?php
+				$sql_adopted = "";
+				if($adopted_type == "all")
+				{
+					echo "여기 실행된거 아닙니까?";
+					$sql_adopted = "select * from member order by SUM(mi_adopted, hi_adopted, ui_adopted) desc";
+				}
+				else if($adopted_type == "middle")
+				{
+					$sql_adopted = "select * from member order by mi_adopted desc";
+				}
+				else if($adopted_type == "high")
+				{
+					$sql_adopted = "select * from member order by hi_adopted desc";
+				}
+				else if($adopted_type == "univ")
+				{
+					$sql_adopted = "select * from member order by ui_adopted desc";
+				}
+			
+				$result_points = $conn->query($sql_points);
+				
+				
+				$num = 1;
+				if($result_points)
+				{
+					while($row_points = $result_points->fetch_assoc())
+					{
+						echo "<tr>
+							<td>" . $num . "</td>
+							<td>" . $row_points["nickname"] . "</td>
+							<td>" . (($adopted_type == "all" || $adopted_type == "middle") ? $row_points["mi_adopted"] : 0 ) + 
+									(($adopted_type == "all" || $adopted_type == "high") ? $row_points["hi_adopted"] : 0 ) + 	
+									(($adopted_type == "all" || $adopted_type == "univ") ? $row_points["ui_adopted"] : 0 ) . "</td></tr>";
+						$num ++;
+					}
+				}
+				else
+				{
+					echo "쿼리 에러";
+				}
+			?>
+		</table>
+
+		</div>
+  </div>
+
+  <div id="footer">
+	<?php
+	include("../frame_bottom.html");
+	?>
+  </div>
+</div>
+</body>

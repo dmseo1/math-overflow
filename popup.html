@@ -1,0 +1,37 @@
+<html>
+<head>
+
+<style type="text/css">
+
+html {overflow:hidden;}
+</style>
+
+<script language="javascript">
+
+
+    function setCookie(cName, cValue, cDay){
+        var expire = new Date();
+        expire.setDate(expire.getDate() + cDay);
+        cookies = cName + '=' + escape(cValue) + '; path=/ '; // 한글 깨짐을 막기위해 escape(cValue)를 합니다.
+        if(typeof cDay != 'undefined') cookies += ';expires=' + expire.toGMTString() + ';';
+        document.cookie = cookies;
+    }
+	function popup_close()
+	{
+		setCookie("Math_Overflow_Main_Popup", "AAAA~~ Kim Gil Gyu Gaeeettttubi", 1);
+		window.close();
+	}
+
+</script>
+</head>
+
+<body topmargin=0 leftmargin=0 bgcolor=#000000>
+
+<img src="/img/popup_image.png" style="width:510;height:500;margin:0 0 0 0" border=0 />
+<input type="checkbox" name="cookie_close" id="cookie_close" onclick="javascript:popup_close()" /> <font color=white>이 팝업을 24시간동안 띄우지 않기</font>
+
+</body>
+
+
+
+</html>

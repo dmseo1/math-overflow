@@ -1,0 +1,27 @@
+td.aero { font-size: 9pt; font-family: Tahoma,Verdana,Sans-Serif; }
+div.aero { font-size: 9pt; font-family: Tahoma,Verdana,Sans-Serif; }
+input.aero { font-size: 9pt; border: 5px solid #4ba200; background-color: #FFFFFF; }
+
+.top-left { width: 22px; height:38px; background-image: url(../images/top-left.png); }
+* html .top-left { width: 22px; height: 38px; background-image: url(../images/blank.gif); filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(src='./images/top-left.png', sizingMethod='scale'); }
+
+.top { height:38px; background-image: url(../images/top.png); background-repeat: repeat-x; cursor: move; } /* width: 620px;*/
+* html .top { height: 38px; background-image: url(../images/blank.gif); filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(src='./images/top.png', sizingMethod='scale'); }
+
+.top-right { width: 28px; height:38px; background-image: url(../images/top-right.png); }
+* html .top-right { width: 28px; height: 38px; background-image: url(../images/blank.gif); filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(src='./images/top-right.png', sizingMethod='scale'); }
+
+.left { width: 22px; background-image: url(../images/left.png); background-repeat: repeat-y; } /* height:444px;*/
+* html .left { width: 22px; background-image: url(../images/blank.gif); filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(src='./images/left.png', sizingMethod='scale'); }
+
+.right { width: 28px; background-image: url(../images/right.png); background-repeat: repeat-y; }
+* html .right { width: 28px; background-image: url(../images/blank.gif); filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(src='./images/right.png', sizingMethod='scale'); }
+
+.bottom-left { width: 22px; height:26px; background-image: url(../images/bottom-left.png); }
+* html .bottom-left { width: 22px; height: 26px; background-image: url(../images/blank.gif); filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(src='./images/bottom-left.png', sizingMethod='scale'); }
+
+.bottom { height:26px; background-image: url(../images/bottom.png); background-repeat: repeat-x; }
+* html .bottom { height: 26px; background-image: url(../images/blank.gif); filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(src='./images/bottom.png', sizingMethod='scale'); }
+
+.bottom-right { width: 28px; height:26px; background-image: url(../images/bottom-right.png); }
+* html .bottom-right { width: 28px; height: 26px; background-image: url(../images/blank.gif); filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(src='./images/bottom-right.png', sizingMethod='scale'); }

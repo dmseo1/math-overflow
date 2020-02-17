@@ -1,0 +1,159 @@
+<?php
+
+	if(isset($_COOKIE['math_overflow_autologin_info']) && isset($_COOKIE['math_overflow_autologin_member_no_info']))
+	{
+		$conn = new mysqli("localhost", "root", "sdm9469", "math_overflow");
+		$dummy = "";
+		$sql_getdummy = "select autologin_dummy from status";
+		$result_getdummy = $conn->query($sql_getdummy);
+		if(!$result_getdummy) { echo "자동 로그인 에러"; }
+		else {
+			while($row_getdummy = $result_getdummy->fetch_assoc())
+			{	
+				$dummy = $row_getdummy['autologin_dummy'];
+			}
+		}
+		
+		if(password_verify(sprintf("%011d", $_COOKIE['math_overflow_autologin_member_no_info']) . $dummy, $_COOKIE['math_overflow_autologin_info']))
+		{
+			
+			//세션을 설정한다.
+			@session_start();
+			$sql_memberinfo = "select * from member where no=" . $_COOKIE['math_overflow_autologin_member_no_info'];
+			$result_memberinfo = $conn->query($sql_memberinfo);
+			if(!$result_memberinfo) { echo "쿠키 조작"; return;}
+			else
+			{
+				while($row_memberinfo = $result_memberinfo->fetch_assoc())
+				{
+					if($row_memberinfo["autologin_allowed"] == 0)
+					{
+
+						$conn = new mysqli("localhost", "root", "sdm9469", "math_overflow");
+						$sql_explicit_cookie_delete = "update member set autologin_cookie=0 where no=" . $_COOKIE['math_overflow_autologin_member_no_info'];
+						$result_explicit_cookie_delete = $conn->query($sql_explicit_cookie_delete);
+						if(!$result_explicit_cookie_delete) { echo "로그아웃 에러"; return; }
+
+
+						echo "<script>setCookie('math_overflow_autologin_info','',-1);</script>";
+						echo "<script>setCookie('math_overflow_autologin_member_no_info', '', -1);</script>";
+						@setcookie("math_overflow_autologin_info", "");
+						@setcookie("math_overflow_autologin_member_no_info", "");
+
+						
+						
+						
+						
+						@session_destroy();
+						
+					} else
+					{
+
+						$_SESSION['user_email'] = $row_memberinfo["email"];
+						$_SESSION['user_nickname'] = $row_memberinfo["nickname"];
+						$_SESSION['user_picture'] = $row_memberinfo["photopath"];
+						$_SESSION['user_member_no'] = $row_memberinfo["no"];	
+					}
+				}
+			}
+			$_SESSION['user_password'] = "MEMBER";
+
+			
+		}
+		else { echo "쿠키 조작 감지. 모든 쿠키 삭제 후 다시 페이지를 여세요."; return;}
+	}
+	else
+	{
+	}
+
+?>
+
+<!doctype html>
+<html lang="en">
+ <head>
+	
+	<style>
+		body
+		{
+			font-family:'맑은 고딕';
+
+		}
+		#member_q
+		{
+			padding-top:20;
+			padding-right:20;
+			
+			border:0;
+		}
+
+		#title_q
+		{
+			padding-left:20;
+			padding-top:30;
+			padding-bottom:1;
+			
+			border:0;
+		}
+	</style>
+	<!-- Bootstrap Core CSS -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+
+ 
+
+ <meta charset="UTF-8 | euc-kr">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <link rel="alternate" type="application/atom+xml" title="Feed of recent questions" href="/feeds">
+  <meta charset="UTF-8">
+  <meta name="Generator" content="EditPlus®">
+  <meta name="Author" content="">
+  <meta name="Keywords" content="">
+  <meta name="Description" content="">
+  <title>프레임 상단</title>
+ </head>
+ <body>
+
+	
+	<?php
+		@session_start();
+		$id_ok = false;
+		$pw_ok = false;
+		$user_email = "";
+
+		if(isset($_SESSION['user_email']) && isset($_SESSION['user_password']))
+		{
+			$id_ok = true;
+			$user_email = $_SESSION['user_email'];
+			$user_nickname = $_SESSION['user_nickname'];
+
+			echo "<div style=\"background-image:URL(/img/img_bg2.jpg);background-size:cover\">";
+			echo "<div id=\"member_q\" style=\"float:right\">";
+			echo "<img src=/member/memberimage/" . $_SESSION['user_picture'] . " width=20 height=20 border=0 />";
+			echo "					  <a href=\"/member/mypage.php\" style=\"text-decoration:none\"><font color=white>" . $user_nickname . " 님</font></a>";
+			echo "					| <a href=\"/index.html\" style=\"text-decoration:none\"><font color=white>홈</font></a>";
+			echo "					| <a href=\"/member/logout.php\" style=\"text-decoration:none\"><font color=white>로그아웃</font></a>";
+			echo "</div>";
+		}
+		else
+		{
+			echo "<div style=\"background-image:URL(/img/img_bg2.jpg);background-size:cover\">";
+			echo "<div id=\"member_q\" style=\"float:right\">";
+			echo "					  <a href=\"/index.html\" style=\"text-decoration:none\"><font color=white>홈</font></a>";
+			echo "					| <a href=\"/member/login.html\" style=\"text-decoration:none\"><font color=white>로그인</font></a>";
+			echo "					| <a href=\"/member/join.html\" style=\"text-decoration:none\"><font color=white>회원가입</font></a>";
+			echo "</div>";
+		}
+	?>
+	<div id="title_q">
+	<h1><a href='/index.html' style='text-decoration:none'><font color=white>Math Overflow</font></a></h1>
+	 <h4><font color=white>Feel free to ask & discuss the mathematics!</font></h4>
+		</div>
+	</div>
+	
+
+
+ </body>
+</html>
